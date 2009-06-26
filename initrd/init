@@ -136,12 +136,6 @@ if [ "$LCDDENSITY" != "" ] ; then
     echo Setting ro.sf.lcd_density=$LCDDENSITY
 fi
 
-SMSFIX=`/bin/grep -o "ril.smsfix=.*" /proc/cmdline | /bin/cut -d" " -f1 | /bin/sed -e "s/ril.smsfix=//g"`
-
-if [ "$SMSFIX" == "1" ] ; then
-    cp /libhtcvogue-sms-ril.so /libhtcvogue-ril.so
-fi
-
 #Give people flexibility to make lots of changes, or to mess lots of things up
 if [ -d /sdcard/initrdupdates ] ; then
     cp /sdcard/initrdupdates/* /
