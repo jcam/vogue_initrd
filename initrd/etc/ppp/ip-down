@@ -1,8 +1,10 @@
 #!/bin/sh
 case $1 in
     ppp0)
-        /bin/echo -e "ATH\r" > /dev/smd0
-        /bin/sleep 1
+        if [ ! -e /sys/class/vogue_hw/gsmphone ] ; then
+            /bin/echo -e "ATH\r" > /dev/smd0
+            /bin/sleep 1
+	fi
 	/bin/echo -e "PPP connection went down" >> /smodem/ppp.log
 	/bin/echo -e "Done!" >> /smodem/ppp.log
         ;;
