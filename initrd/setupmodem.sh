@@ -52,6 +52,12 @@ while [ "$MODEMOK" == "yes" ] ; do
 			modem_log "pppd already running"
 		fi
 	elif [ "$CMD" = "off" ]; then
+	    if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+		/bin/echo -e "ATH\r" > /dev/smd0
+		if [ -e /etc/ppp/ppp-gprs.pid ] ; then
+			/bin/kill `/bin/grep -v ppp /etc/ppp/ppp-gprs.pid`
+		fi	
+	    else
 		if [ ! -e /etc/ppp/ppp-gprs.pid ] ; then
 			modem_log "Connection is already terminated. Resetting Modem..."
 			/bin/echo -e "AT+CFUN=66\r" > /dev/smd0
@@ -66,6 +72,7 @@ while [ "$MODEMOK" == "yes" ] ; do
 			modem_log "Shutting down pppd..."
 			/bin/kill `/bin/grep -v ppp /etc/ppp/ppp-gprs.pid`
 		fi
+	    fi
 
 	elif [ "$CMD" != "" ]; then
 		modem_log "Invalid command: $CMD"
