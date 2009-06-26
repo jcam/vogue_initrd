@@ -1,0 +1,9 @@
+debug
+defaultroute
+local
+usepeerdns
+name mobile@jamamobile
+noipdefault
+unit 0
+linkname gprs
+novj

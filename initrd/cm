@@ -1,0 +1,2 @@
+echo -e "AT+HTC_DUN=0\r" > /dev/smd0
+echo -e "ATDT#777\r" > /dev/smd0

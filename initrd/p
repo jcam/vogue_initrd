@@ -1,0 +1,1 @@
+/bin/pppd /dev/smd1 connect /cm disconnect /dcm idle 60 persist demand holdoff 10 debug defaultroute local usepeerdns name mobile@jamamobile noipdefault unit 0 linkname gprs novj noauth

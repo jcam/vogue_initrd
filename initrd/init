@@ -1,0 +1,78 @@
+#!/bin/sh
+echo "Welcome to Vogue Linux"
+mount -t proc proc /proc
+mount -t sysfs sys /sys
+fail() {
+    echo "Failed"
+    echo "$1"
+    exec /bin/sh
+}
+while [ ! -e /sys/block/mmcblk0 ] ; do
+	echo "Waiting for SD Card"
+	sleep 1
+done
+
+if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+   echo "GSM phone found"
+#	cp /initmodem1-gsm /initmodem1
+#	cp /initmodem2-gsm /initmodem2
+fi
+
+if [ ! -e /sys/block/mmcblk0/mmcblk0p1 ] ; then
+	fail "No partition found on SD card"
+fi
+
+#if [ "`cat /sys/block/mmcblk0/mmcblk0p2/size`" = "132240" ] ; then
+#	PARTITIONED=1
+#	echo "Data Partition Found"
+#else
+	PARTITIONED=0
+#fi
+
+mount -t vfat -o fmask=0000,dmask=0000,rw /dev/block/mmcblk0p1 /sdcard
+[ $? -eq 0 ] || fail "Failed to Mount SD Card"
+
+if [ ! -d /sdcard/cache ] ; then
+	/bin/mkdir /sdcard/cache
+fi
+
+/bin/mount /sdcard/cache /cache
+
+if [ -e /sdcard/data.gz ] ; then
+	echo "Please wait... extracting Data Image"
+	if [ $PARTITIONED = "0" ] ; then
+		rm /sdcard/data.img
+		gzip -d /sdcard/data.gz
+   	[ $? -eq 0 ] || fail "Failed to extract Data Image"
+		mv /sdcard/data /sdcard/data.img
+	else
+		gzip -cd /sdcard/data.gz > /dev/block/mmcblk0p2
+		rm /sdcard/data.gz
+	fi
+	echo "done"
+fi
+
+losetup /dev/block/loop1 /sdcard/system.img
+[ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
+mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
+[ $? -eq 0 ] || fail "Failed to mount /system"
+
+if [ $PARTITIONED = "0" ] ; then
+	losetup /dev/block/loop0 /sdcard/data.img
+	[ $? -eq 0 ] || fail "Failed to find data.img on SD Card"
+	/bin/e2fsck -y /dev/block/loop0
+	mount -t ext2 -o noatime,nodiratime /dev/block/loop0 /data
+else
+	/bin/e2fsck -y /dev/block/mmcblk0p2
+	mount -t ext2 -o noatime,nodiratime /dev/block/mmcblk0p2 /data
+fi
+[ $? -eq 0 ] || fail "Failed to mount /data"
+
+if [ -d /sdcard/AndroidApps ] ; then
+	echo Copying Applications
+	cp /sdcard/AndroidApps/* /data/app
+fi
+echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
+ifconfig usb0 192.168.2.1 up
+telnetd
+exec /init1

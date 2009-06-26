@@ -1,0 +1,1 @@
+echo -e "ATH\r" > /dev/smd0
