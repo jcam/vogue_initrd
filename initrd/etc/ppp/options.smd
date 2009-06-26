@@ -1,5 +1,7 @@
 debug
+connect /etc/ppp/ppp-on-dialer
 defaultroute
+updetach
 local
 usepeerdns
 name mobile@jamamobile

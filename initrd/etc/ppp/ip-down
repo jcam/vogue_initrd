@@ -1,5 +1,11 @@
-#!/system/bin/sh
+#!/bin/sh
 case $1 in
+    ppp0)
+        /bin/echo -e "ATH\r" > /dev/smd0
+        /bin/sleep 1
+	/bin/echo -e "PPP connection went down" >> /smodem/ppp.log
+	/bin/echo -e "Done!" >> /smodem/ppp.log
+        ;;
     ppp1)
 	echo 0 > /proc/sys/net/ipv4/ip_forward;
 	;;

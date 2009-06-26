@@ -1,0 +1,12 @@
+#!/bin/sh
+if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+        /bin/echo -e "AT+CGDCONT=1,\"IP\",\"$APN\",,0,0\r" > /dev/smd0
+        /bin/sleep 2
+        /bin/echo -e "ATD*99***1#\r" > /dev/smd0
+        /bin/sleep 4
+else
+	/bin/echo -e "AT+HTC_DUN=0\r" > /dev/smd0
+	/bin/sleep 2
+	/bin/echo -e "ATDT#777\r" > /dev/smd0
+	/bin/sleep 4
+fi
