@@ -1,7 +1,12 @@
 #!/bin/sh
 echo "Welcome to Vogue Linux"
+mkdir -m 0755 /proc
 mount -t proc proc /proc
+mkdir -m 0755 /sys
 mount -t sysfs sys /sys
+
+#Configure Devices
+MAKEDEVS
 
 fail() {
     echo "Failed"
@@ -28,35 +33,18 @@ fi
     PARTITIONED=0
 #fi
 
-mount -t vfat -o fmask=0000,dmask=0000,ro,flush /dev/block/mmcblk0p1 /sdcard
-if [ "$?" != "0" ] ; then
-    echo "Failed to Mount SD Card. Trying to check it anyways"
-fi
-
-if [ ! -d /sdcard/cache ] ; then
-    /bin/mkdir /sdcard/cache
-fi
-
-bin/mount /sdcard/cache /cache
-
-if [ -e /sdcard/system.ext2 ] ; then
-    echo "Using uncompressed system"
-    losetup /dev/block/loop1 /sdcard/system.ext2
-    [ $? -eq 0 ] || fail "Failed to reach system.ext2 on SD Card"
-    mount -t ext2 -o ro,noatime,nodiratime /dev/block/loop1 /system
-    [ $? -eq 0 ] || fail "Failed to mount /system"
-else
-    losetup /dev/block/loop1 /sdcard/system.img
-    [ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
-    mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
-    [ $? -eq 0 ] || fail "Failed to mount /system"
-fi
-
+mkdir -m 0777 /sdcard
 echo "Running an fsck on the SD card"
 dosfsck -y /dev/block/mmcblk0p1
-echo "Mounting the SD card writeable"
-mount -o remount,rw /dev/block/mmcblk0p1
-[ $? -eq 0 ] || fail "Failed to mount the SD card writeable. Cannot continue."
+mount -t vfat -o fmask=0000,dmask=0000,rw,flush,noatime,nodiratime /dev/block/mmcblk0p1 /sdcard
+[ $? -eq 0 ] || fail "Failed to mount the SD card. Cannot continue."
+
+if [ ! -d /sdcard/cache ] ; then
+    mkdir /sdcard/cache
+fi
+
+mkdir -m 0777 /cache
+mount /sdcard/cache /cache
 
 if [ -e /sdcard/data.gz ] ; then
     echo "Please wait... extracting Data Image"
@@ -94,22 +82,40 @@ if [ "$?" == "0" ] ; then
     echo "...Done!"
 fi
 
+mkdir -m 0755 /data
 if [ $PARTITIONED = "0" ] ; then
-	losetup /dev/block/loop0 /sdcard/data.img
+    losetup /dev/block/loop0 /sdcard/data.img
     [ $? -eq 0 ] || fail "Failed to find data.img on SD Card"
-    /bin/e2fsck -y /dev/block/loop0
+    e2fsck -y /dev/block/loop0
     mount -t ext2 -o noatime,nodiratime,sync /dev/block/loop0 /data
 else
-    /bin/e2fsck -y /dev/block/mmcblk0p2
+    e2fsck -y /dev/block/mmcblk0p2
     mount -t ext2 -o noatime,nodiratime /dev/block/mmcblk0p2 /data
 fi
 [ $? -eq 0 ] || fail "Failed to mount /data"
 
-if [ -d /data/app ] ; then
-    if [ -d /sdcard/AndroidApps ] ; then
-        echo Copying Applications
-        cp /sdcard/AndroidApps/* /data/app
+
+mkdir -m 0755 /system
+if [ -e /sdcard/system.ext2 ] ; then
+    echo "Using uncompressed system"
+    losetup /dev/block/loop1 /sdcard/system.ext2
+    [ $? -eq 0 ] || fail "Failed to reach system.ext2 on SD Card"
+    e2fsck -y /dev/block/loop1
+    mount -t ext2 -o ro,noatime,nodiratime /dev/block/loop1 /system
+    [ $? -eq 0 ] || fail "Failed to mount /system"
+else
+    losetup /dev/block/loop1 /sdcard/system.img
+    [ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
+    mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
+    [ $? -eq 0 ] || fail "Failed to mount /system"
+fi
+
+if [ -d /sdcard/AndroidApps ] ; then
+    echo Copying Applications
+    if [ ! -d /data/app ] ; then
+        mkdir -m 0771 /data/app
     fi
+    cp /sdcard/AndroidApps/* /data/app
     chown -R 1000:1000 /data/app
 fi
 
@@ -123,7 +129,7 @@ if [ ! -d /sdcard/media ] ; then
     cp -R /system/media /sdcard
 fi
 
-LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/cut -d" " -f1 | /bin/sed -e "s/lcd.density=//g"`
+LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/cut -c" " -f1 | /bin/sed -e "s/lcd.density=//g"`
 
 if [ "$LCDDENSITY" != "" ] ; then
     echo "ro.sf.lcd_density=$LCDDENSITY" >> /default.prop
@@ -136,6 +142,7 @@ if [ "$SMSFIX" == "1" ] ; then
     cp /libhtcvogue-sms-ril.so /libhtcvogue-ril.so
 fi
 
+#Give people flexibility to make lots of changes, or to mess lots of things up
 if [ -d /sdcard/initrdupdates ] ; then
     cp /sdcard/initrdupdates/* /
 fi
