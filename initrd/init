@@ -129,7 +129,7 @@ if [ ! -d /sdcard/media ] ; then
     cp -R /system/media /sdcard
 fi
 
-LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/cut -c" " -f1 | /bin/sed -e "s/lcd.density=//g"`
+LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/cut -d" " -f1 | /bin/sed -e "s/lcd.density=//g"`
 
 if [ "$LCDDENSITY" != "" ] ; then
     echo "ro.sf.lcd_density=$LCDDENSITY" >> /default.prop
