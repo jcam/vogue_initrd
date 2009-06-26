@@ -221,7 +221,7 @@ service vold /system/bin/vold
 
 service debuggerd /system/bin/debuggerd
 
-service ril-daemon /system/bin/rild -l /libhtcvogue-ril.so -- -d /dev/smd0
+service ril-daemon /system/bin/rild -l /libhtcgeneric-ril.so -- -d /dev/smd0
     socket rild stream 660 root radio
     socket rild-debug stream 660 radio system
     user root
