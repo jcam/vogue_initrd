@@ -1,0 +1,4 @@
+#!/bin/sh
+cd initrd
+chown -R 0:0 *
+find . | cpio -o -H newc | gzip > ../initrd.gz
