@@ -29,8 +29,8 @@ PPPPASS=`/bin/grep -o "ppp.password=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.pas
 APN=`/bin/grep -o "ppp.apn=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.apn=//g" -e "s/ .*//g"`
 /bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/pap-secrets
 /bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/chap-secrets
-/bin/sed -e 's/^name .*/name $PPPUSER/g' /etc/ppp/options.smd > /etc/ppp/options.smd1
-/bin/sed -e 's/^APN=.*/APN=$APN/g' /etc/ppp/dialer.smd > /etc/ppp/dialer.smd1
+/bin/sed -e "s/^name .*/name $PPPUSER/g" /etc/ppp/options.smd > /etc/ppp/options.smd1
+/bin/sed -e "s/^APN=.*/APN=$APN/g" /etc/ppp/dialer.smd > /etc/ppp/dialer.smd1
 /bin/echo "Username=$PPPUSER"
 /bin/echo "Password=$PPPPASS"
 /bin/echo "APN=$APN"
