@@ -1,4 +1,5 @@
 #!/bin/sh
+APN=
 if [ -e /sys/class/vogue_hw/gsmphone ] ; then
         /bin/echo -e "AT+CGDCONT=1,\"IP\",\"$APN\",,0,0\r" > /dev/smd0
         /bin/sleep 2

@@ -1,5 +1,5 @@
 debug
-connect /etc/ppp/ppp-on-dialer
+connect /etc/ppp/dialer.smd1
 defaultroute
 updetach
 local

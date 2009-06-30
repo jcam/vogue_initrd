@@ -1,10 +1,10 @@
 #!/bin/sh
 
-STARTCHECK=`/bin/grep -o "ppp.nostart=.*" /proc/cmdline | /bin/cut -d" " -f1 | /bin/sed -e "s/ppp.nostart=//g"`
+STARTCHECK=`/bin/grep -o "ppp.nostart=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.nostart=//g" -e "s/ .*//g"`
 if [ "$STARTCHECK" == "1" ] ; then
-    CMD=""
+	CMD=""
 else
-    CMD="on"
+	CMD="on"
 fi
 
 MODEMOK="yes"
@@ -24,14 +24,16 @@ modem_log()
 modem_log "Modem initialization started"
 #/system/bin/setprop ro.radio.use-ppp no
 #/system/bin/setprop ro.config.nocheckin yes
-PPPUSER=`/bin/grep -o "ppp.username=.*" /proc/cmdline | /bin/cut -d" " -f1 | /bin/sed -e "s/ppp.username=//g"`
-PPPPASS=`/bin/grep -o "ppp.password=.*" /proc/cmdline | /bin/cut -d" " -f1 | /bin/sed -e "s/ppp.password=//g"`
+PPPUSER=`/bin/grep -o "ppp.username=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.username=//g" -e "s/ .*//g"`
+PPPPASS=`/bin/grep -o "ppp.password=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.password=//g" -e "s/ .*//g"`
+APN=`/bin/grep -o "ppp.apn=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.apn=//g" -e "s/ .*//g"`
 /bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/pap-secrets
 /bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/chap-secrets
-/bin/grep -v "^name " /etc/ppp/options.smd | /bin/sed '$a'"name \"$PPPUSER\"" > /etc/ppp/options.smd1
+/bin/sed -e 's/^name .*/name $PPPUSER/g' /etc/ppp/options.smd > /etc/ppp/options.smd1
+/bin/sed -e 's/^APN=.*/APN=$APN/g' /etc/ppp/dialer.smd > /etc/ppp/dialer.smd1
 /bin/echo "Username=$PPPUSER"
 /bin/echo "Password=$PPPPASS"
-/bin/echo ""
+/bin/echo "APN=$APN"
 modem_log "Modem initialization completed"
 
 while [ "$MODEMOK" == "yes" ] ; do
@@ -44,35 +46,31 @@ while [ "$MODEMOK" == "yes" ] ; do
 				modem_log "Connection attempt FAILED!"
 			else
 				modem_log "Connection attempt SUCCESSFUL!"
-	                        modem_log "Phone IP:  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f2 | /bin/cut -d' ' -f1`"
-        	                modem_log "Subnet  :  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f4 | /bin/cut -d' ' -f1`"
-                	        modem_log "P-t-P   :  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f3 | /bin/cut -d' ' -f1`"
+				modem_log "Phone IP:  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f2 | /bin/cut -d' ' -f1`"
+				modem_log "Subnet  :  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f4 | /bin/cut -d' ' -f1`"
+				modem_log "P-t-P   :  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f3 | /bin/cut -d' ' -f1`"
 			fi
 		else
 			modem_log "pppd already running"
 		fi
 	elif [ "$CMD" = "off" ]; then
-	    if [ -e /sys/class/vogue_hw/gsmphone ] ; then
 		/bin/echo -e "ATH\r" > /dev/smd0
-		if [ -e /etc/ppp/ppp-gprs.pid ] ; then
-			/bin/kill `/bin/grep -v ppp /etc/ppp/ppp-gprs.pid`
-		fi	
-	    else
 		if [ ! -e /etc/ppp/ppp-gprs.pid ] ; then
-			modem_log "Connection is already terminated. Resetting Modem..."
-			/bin/echo -e "AT+CFUN=66\r" > /dev/smd0
-			/bin/sleep 2
-			/bin/echo -e "AT+CFUN=1\r" > /dev/smd0
-			/bin/sleep 2
-			/bin/echo -e "AT+CLVL=102\r" > /dev/smd0
-			/bin/sleep 1
-			/bin/echo -e "AT+CMUT=0\r" > /dev/smd0
-			MODEMOK="no"
+			if [ ! -e /sys/class/vogue_hw/gsmphone ] ; then
+				modem_log "Connection is already terminated. Resetting Modem..."
+				/bin/echo -e "AT+CFUN=66\r" > /dev/smd0
+				/bin/sleep 2
+				/bin/echo -e "AT+CFUN=1\r" > /dev/smd0
+				/bin/sleep 2
+				/bin/echo -e "AT+CLVL=102\r" > /dev/smd0
+				/bin/sleep 1
+				/bin/echo -e "AT+CMUT=0\r" > /dev/smd0
+				MODEMOK="no"
+			fi
 		else
 			modem_log "Shutting down pppd..."
 			/bin/kill `/bin/grep -v ppp /etc/ppp/ppp-gprs.pid`
 		fi
-	    fi
 
 	elif [ "$CMD" != "" ]; then
 		modem_log "Invalid command: $CMD"
