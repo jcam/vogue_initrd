@@ -19,8 +19,9 @@ loglevel 3
     symlink /system/etc /etc
 
 # Setup symlinks for libraries included in the initrd
-    symlink /system/lib/libcamera.so /libcamera.so
-    symlink /system/lib/libgps.so /libgps.so
+    symlink /system/lib/libcamera.so /lib/libcamera.so
+    symlink /system/lib/libgps.so /lib/libgps.so
+    symlink /system/lib/libcameraservice.so /lib/libcameraservice.so
 
 # create mountpoints and mount tmpfs on sqlite_stmt_journals
 #    mkdir /sdcard 0000 system system
@@ -221,7 +222,7 @@ service vold /system/bin/vold
 
 service debuggerd /system/bin/debuggerd
 
-service ril-daemon /system/bin/rild -l /libhtcgeneric-ril.so -- -d /dev/smd0
+service ril-daemon /system/bin/rild -l /lib/libhtcgeneric-ril.so -- -d /dev/smd0
     socket rild stream 660 root radio
     socket rild-debug stream 660 radio system
     user root
