@@ -67,6 +67,10 @@ loglevel 3
 # create basic filesystem structure
     mkdir /data/misc 01771 system misc
     mkdir /data/misc/hcid 0770 bluetooth bluetooth
+	mkdir /data/misc/wifi 0770 wifi wifi
+	mkdir /data/misc/wifi/sockets 0770 wifi wifi
+	mkdir /data/misc/dhcp 0770 dhcp dhcp
+	chown dhcp dhcp /data/misc/dhcp
     mkdir /data/local 0771 shell shell
     mkdir /data/local/tmp 0771 shell shell
     mkdir /data/data 0771 system system
@@ -97,6 +101,9 @@ on boot
 
 # set RLIMIT_NICE to allow priorities from 19 to -20
     setrlimit 13 40 40
+
+# Set timeout value for rmnet stats.
+	write /sys/devices/virtual/net/rmnet0/timeout_suspend 5000000
 
 # Define the oom_adj values for the classes of processes that can be
 # killed by the kernel.  These are used in ActivityManagerService.
@@ -170,6 +177,9 @@ on boot
     chown system system /sys/kernel/ipv4/tcp_rmem_min
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
+	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
+	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
+	chmod 0660				  /sys/class/rfkill/rfkill0/state
     chown root radio /proc/cmdline
 
 # Define TCP buffer sizes for various networks
@@ -243,6 +253,12 @@ service bootsound /system/bin/playmp3
     oneshot
     disabled
 
+service hciattach /system/bin/hciattach \
+	-n -s 115200 /dev/ttyHS0 texas 4000000 flow
+	user bluetooth
+	group bluetooth net_bt_admin
+	disabled
+
 service dbus /system/bin/dbus-daemon --system --nofork
     socket dbus stream 660 bluetooth bluetooth
     user bluetooth
@@ -270,3 +286,21 @@ service hsag /system/bin/sdptool add --channel=11 HSAG
 
 service installd /system/bin/installd
     socket installd stream 600 system system
+
+service wlan_loader /system/bin/wlan_loader \
+	-f /system/etc/wifi/Fw1251r1c.bin -e /proc/calibration \
+	-i /system/etc/wifi/tiwlan.ini
+	disabled
+	oneshot
+
+service wpa_supplicant /system/bin/wpa_supplicant \
+	-Dtiwlan0 -itiwlan0 -c/data/misc/wifi/wpa_supplicant.conf
+	user wifi
+	group wifi inet
+	socket wpa_tiwlan0 dgram 660 wifi wifi
+	disabled
+	oneshot
+
+service dhcpcd /system/bin/dhcpcd -BKL tiwlan0
+	disabled
+	oneshot 
