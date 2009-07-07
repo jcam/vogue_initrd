@@ -2,7 +2,7 @@
 CMD=""
 STARTCHECK=`/bin/grep -o "ppp.nostart=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.nostart=//g" -e "s/ .*//g"`
 if [ "$STARTCHECK" != "1" ] ; then
-	if [ ! -e /smodem/ppp.log ]
+	if [ ! -e /smodem/ppp.log ] ; then
 		CMD="on"
 	fi
 fi
