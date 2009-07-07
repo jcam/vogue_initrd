@@ -1,10 +1,10 @@
 #!/bin/sh
-
+CMD=""
 STARTCHECK=`/bin/grep -o "ppp.nostart=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.nostart=//g" -e "s/ .*//g"`
-if [ "$STARTCHECK" == "1" ] ; then
-	CMD=""
-else
-	CMD="on"
+if [ "$STARTCHECK" != "1" ] ; then
+	if [ ! -e /smodem/ppp.log ]
+		CMD="on"
+	fi
 fi
 
 MODEMOK="yes"
@@ -58,13 +58,7 @@ while [ "$MODEMOK" == "yes" ] ; do
 		if [ ! -e /etc/ppp/ppp-gprs.pid ] ; then
 			if [ ! -e /sys/class/vogue_hw/gsmphone ] ; then
 				modem_log "Connection is already terminated. Resetting Modem..."
-				/bin/echo -e "AT+CFUN=66\r" > /dev/smd0
-				/bin/sleep 2
-				/bin/echo -e "AT+CFUN=1\r" > /dev/smd0
-				/bin/sleep 2
-				/bin/echo -e "AT+CLVL=102\r" > /dev/smd0
-				/bin/sleep 1
-				/bin/echo -e "AT+CMUT=0\r" > /dev/smd0
+				/cdmaReset
 				MODEMOK="no"
 			fi
 		else

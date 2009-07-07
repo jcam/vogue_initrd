@@ -119,14 +119,8 @@ if [ -d /sdcard/AndroidApps ] ; then
     chown -R 1000:1000 /data/app
 fi
 
-if [ -e /sdcard/default.prop ] ; then
-    echo Copying default.prop
-    cp /sdcard/default.prop /default.prop
-fi
-
 if [ ! -d /sdcard/media ] ; then
-    echo Copying sounds
-    cp -R /system/media /sdcard
+    echo You have no media folder, please extract the resources to your SD card
 fi
 
 LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
@@ -138,7 +132,12 @@ fi
 
 #Give people flexibility to make lots of changes, or to mess lots of things up
 if [ -d /sdcard/initrdupdates ] ; then
-    cp /sdcard/initrdupdates/* /
+    cp -R /sdcard/initrdupdates/* /
+fi
+
+#Let people really mess things up
+if [ -e /bootscript.sh ] ; then
+	sh /bootscript.sh
 fi
 
 SQLITE3="/bin/sqlite3"
@@ -152,7 +151,7 @@ else
     echo No telephony database. You must have a new data file. I will check for the android apn on the next reboot
 fi
 
-cp -a /system/etc/* /etc
+# Not sure why we're doing this... cp -a /system/etc/* /etc
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
 #ifconfig usb0 192.168.2.1 up
 #telnetd -b 192.168.2.1
