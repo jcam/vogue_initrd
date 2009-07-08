@@ -18,11 +18,6 @@ loglevel 3
 # Backward compatibility
     symlink /system/etc /etc
 
-# Setup symlinks for libraries included in the initrd
-    symlink /system/lib/libcamera.so /lib/libcamera.so
-    symlink /system/lib/libgps.so /lib/libgps.so
-    symlink /system/lib/libcameraservice.so /lib/libcameraservice.so
-
 # create mountpoints and mount tmpfs on sqlite_stmt_journals
 #    mkdir /sdcard 0000 system system
 #    mkdir /system
@@ -264,7 +259,7 @@ service dbus /system/bin/dbus-daemon --system --nofork
     user bluetooth
     group bluetooth net_bt_admin
 
-service hcid /system/bin/hcid -s -n -f /etc/bluez/hcid.conf
+service hcid /system/bin/hcid -s -n -f /system/etc/bluez/hcid.conf
     socket bluetooth stream 660 bluetooth bluetooth
     socket dbus_bluetooth stream 660 bluetooth bluetooth
     # init.rc does not yet support applying capabilities, so run as root and
