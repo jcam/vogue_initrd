@@ -151,7 +151,8 @@ else
     echo No telephony database. You must have a new data file. I will check for the android apn on the next reboot
 fi
 
-# Not sure why we're doing this... cp -a /system/etc/* /etc
+# backwards compatibility, instead of symlink in init.rc
+cp -a /system/etc/* /etc
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
 #ifconfig usb0 192.168.2.1 up
 #telnetd -b 192.168.2.1
