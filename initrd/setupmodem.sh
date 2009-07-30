@@ -7,7 +7,7 @@ if [ "$STARTCHECK" != "1" ] ; then
 	fi
 fi
 
-MODEMOK="yes"
+MODEMOK="no"
 
 modem_log()
 {
@@ -17,27 +17,30 @@ modem_log()
 /bin/echo "${$}" > /smodem/setupmodem.pid
 
 
-/bin/echo ""
-/bin/echo "Initialising Modem:"
-/bin/echo "==================="
-/bin/echo ""
-modem_log "Modem initialization started"
-#/system/bin/setprop ro.radio.use-ppp no
-#/system/bin/setprop ro.config.nocheckin yes
-PPPUSER=`/bin/grep -o "ppp.username=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.username=//g" -e "s/ .*//g"`
-PPPPASS=`/bin/grep -o "ppp.password=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.password=//g" -e "s/ .*//g"`
-APN=`/bin/grep -o "ppp.apn=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.apn=//g" -e "s/ .*//g"`
-/bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/pap-secrets
-/bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/chap-secrets
-/bin/sed -e "s/^name .*/name $PPPUSER/g" /etc/ppp/options.smd > /etc/ppp/options.smd1
-/bin/sed -e "s/^APN=.*/APN=$APN/g" /etc/ppp/dialer.smd > /etc/ppp/dialer.smd1
-/bin/echo "Username=$PPPUSER"
-/bin/echo "Password=$PPPPASS"
-/bin/echo "APN=$APN"
-modem_log "Modem initialization completed"
-
-while [ "$MODEMOK" == "yes" ] ; do
+while true ; do
 	echo "working" > /smodem/working
+	if [ "$MODEMOK" = "no" ]; then 
+		/bin/echo ""
+		/bin/echo "Initializing Modem:"
+		/bin/echo "==================="
+		/bin/echo ""
+		modem_log "Modem initialization started"
+		#/system/bin/setprop ro.radio.use-ppp no
+		#/system/bin/setprop ro.config.nocheckin yes
+		PPPUSER=`/bin/grep -o "ppp.username=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.username=//g" -e "s/ .*//g"`
+		PPPPASS=`/bin/grep -o "ppp.password=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.password=//g" -e "s/ .*//g"`
+		APN=`/bin/grep -o "ppp.apn=.*" /proc/cmdline | /bin/sed -e "s/.*ppp.apn=//g" -e "s/ .*//g"`
+		/bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/pap-secrets
+		/bin/echo "$PPPUSER * $PPPPASS" > /etc/ppp/chap-secrets
+		/bin/sed -e "s/^name .*/name $PPPUSER/g" /etc/ppp/options.smd > /etc/ppp/options.smd1
+		/bin/sed -e "s/^APN=.*/APN=$APN/g" /etc/ppp/dialer.smd > /etc/ppp/dialer.smd1
+		/bin/echo "Username=$PPPUSER"
+		/bin/echo "Password=$PPPPASS"
+		/bin/echo "APN=$APN"
+		modem_log "Modem initialization completed"
+
+		MODEMOK="yes"
+	fi
 	if [ "$CMD" = "on" ]; then 
 		if [ ! -e /etc/ppp/ppp-gprs.pid ] ; then
 			modem_log "Starting pppd..."
@@ -56,11 +59,9 @@ while [ "$MODEMOK" == "yes" ] ; do
 	elif [ "$CMD" = "off" ]; then
 		/bin/echo -e "ATH\r" > /dev/smd0
 		if [ ! -e /etc/ppp/ppp-gprs.pid ] ; then
-			if [ ! -e /sys/class/vogue_hw/gsmphone ] ; then
-				modem_log "Connection is already terminated. Resetting Modem..."
-				/cdmaReset
-				MODEMOK="no"
-			fi
+			modem_log "Connection is already terminated. Resetting Modem..."
+			/bin/killall rild
+			MODEMOK="no"
 		else
 			modem_log "Shutting down pppd..."
 			/bin/kill `/bin/grep -v ppp /etc/ppp/ppp-gprs.pid`
