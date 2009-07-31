@@ -1,5 +1,4 @@
 #!/bin/sh
-mkdir -m 0755 /dev
 mkdir -m 0777 /dev/block
 mknod -m 0666 /dev/block/loop0 b 7 0
 mknod -m 0666 /dev/block/loop1 b 7 1
@@ -21,5 +20,5 @@ mknod -m 0644 /dev/ppp0 c 108 0
 mknod -m 0644 /dev/smd0 c 253 0
 mknod -m 0644 /dev/smd1 c 253 1
 
-mkdir -m 0755 /smodem
+mkdir -m 0777 /smodem
 mknod -m 0777 /smodem/control p

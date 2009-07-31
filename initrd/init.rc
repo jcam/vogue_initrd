@@ -51,6 +51,12 @@ loglevel 3
     chmod 0770 /cache
     chmod 0777 /dev/smd0
     chmod 0777 /dev/smd1
+    chown root radio /etc/ppp/pap-secrets
+    chown root radio /etc/ppp/chap-secrets
+    chown root radio /etc/ppp/options.smd1
+	chmod 0775 /etc/ppp/pap-secrets
+	chmod 0775 /etc/ppp/chap-secrets
+	chmod 0775 /etc/ppp/options.smd1
     chmod 0777 /dev/vfe
     chmod 0777 /dev/camera
     chmod 0777 /dev/vogue_gps
