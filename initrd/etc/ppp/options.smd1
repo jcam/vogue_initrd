@@ -3,6 +3,7 @@ defaultroute
 updetach
 local
 usepeerdns
+maxfail 2
 noipdefault
 unit 0
 linkname gprs
