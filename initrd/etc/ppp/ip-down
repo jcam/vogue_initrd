@@ -16,3 +16,8 @@ NAME=${LINKNAME:-"$1"}
 /system/bin/setprop "net.$NAME.dns2" "$DNS2" 
 /system/bin/setprop "net.$NAME.local-ip" "$IPLOCAL" 
 /system/bin/setprop "net.$NAME.remote-ip" "$IPREMOTE" 
+if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+	/bin/echo -e "AT+CREG?\r" > /dev/smd0
+else
+	/bin/echo -e "AT+COPS?\r" > /dev/smd0
+fi

@@ -27,3 +27,8 @@ NAME=${LINKNAME:-"$1"}
 /bin/echo -e "P-t-P   :  $IPREMOTE" > /smodem/ppp.log
 /bin/echo -e "DNS     :  $DNS1" > /smodem/ppp.log
 /bin/echo -e "Done!" >> /smodem/ppp.log
+if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+	/bin/echo -e "AT+CREG?\r" > /dev/smd0
+else
+    /bin/echo -e "AT+COPS?\r" > /dev/smd0
+fi
