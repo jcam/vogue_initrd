@@ -1,0 +1,17 @@
+#!/bin/sh
+rm rootfs.img
+dd if=/dev/zero of=rootfs.img bs=1048576 count=10
+mkfs.ext2 -F rootfs.img
+mount -o loop rootfs.img /mnt
+cp -a rootfs/* /mnt
+mkdir -m 0777 /mnt/cache
+mkdir -m 0755 /mnt/data
+mkdir -m 0777 /mnt/dev
+mkdir -m 0755 /mnt/etc
+mkdir -m 0755 /mnt/proc
+mkdir -m 0777 /mnt/sdcard
+mkdir -m 0777 /mnt/smodem
+mkdir -m 0755 /mnt/sys
+mkdir -m 0755 /mnt/system
+chown -R 0:0 /mnt/*
+umount /mnt

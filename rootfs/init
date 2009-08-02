@@ -1,0 +1,150 @@
+#!/bin/sh
+#mkdir -m 0755 /proc
+mount -t proc proc /proc
+#mkdir -m 0755 /sys
+mount -t sysfs sys /sys
+
+fail() {
+    echo "Failed"
+    echo "$1"
+    exec /bin/sh
+}
+if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+    echo "GSM phone found"
+fi
+
+PARTITIONED=0
+
+#mkdir -m 0777 /sdcard
+#echo "Running an fsck on the SD card"
+#dosfsck -y /dev/block/mmcblk0p1
+mount -t vfat -o fmask=0000,dmask=0000,rw,flush,noatime,nodiratime /dev/block/mmcblk0p1 /sdcard
+[ $? -eq 0 ] || fail "Failed to mount the SD card. Cannot continue."
+
+if [ ! -d /sdcard/cache ] ; then
+    mkdir /sdcard/cache
+fi
+
+#mkdir -m 0777 /cache
+mount /sdcard/cache /cache
+
+if [ -e /sdcard/data.gz ] ; then
+    echo "Please wait... extracting Data Image"
+    if [ $PARTITIONED = "0" ] ; then
+        if [ -e /sdcard/data.img ] ; then
+            rm /sdcard/data.img
+        fi
+        gzip -df /sdcard/data.gz
+        [ $? -eq 0 ] || fail "Failed to extract Data Image"
+        mv /sdcard/data /sdcard/data.img
+    else
+        gzip -cd /sdcard/data.gz > /dev/block/mmcblk0p2
+        rm /sdcard/data.gz
+    fi
+    echo "done"
+fi
+
+if [ $PARTITIONED = "0" ] ; then
+    if [ ! -e /sdcard/data.img ] ; then
+        echo "Creating a new Data store"
+        dd if=/dev/zero of=/sdcard/data.img bs=1048576 count=128
+        [ $? -eq 0 ] || fail "Failed to allocate the storage"
+        mke2fs -F /sdcard/data.img
+        [ $? -eq 0 ] || fail "Failed to format the storage"
+    fi
+fi
+
+read -s -n1 -p "Press any key to start an automatic backup\n" -t 5
+if [ "$?" == "0" ] ; then
+    echo "Starting Backup..."
+    if [ ! -d /sdcard/backup ] ; then
+        mkdir /sdcard/backup
+    fi
+    gzip -vc /sdcard/data.img > /sdcard/backup/data$(date +%Y-%m-%d).gz
+    echo "...Done!"
+fi
+
+#mkdir -m 0755 /data
+if [ $PARTITIONED = "0" ] ; then
+    losetup /dev/block/loop0 /sdcard/data.img
+    [ $? -eq 0 ] || fail "Failed to find data.img on SD Card"
+    e2fsck -y /dev/block/loop0
+    mount -t ext2 -o noatime,nodiratime,sync /dev/block/loop0 /data
+else
+    e2fsck -y /dev/block/mmcblk0p2
+    mount -t ext2 -o noatime,nodiratime /dev/block/mmcblk0p2 /data
+fi
+[ $? -eq 0 ] || fail "Failed to mount /data"
+
+
+#mkdir -m 0755 /system
+if [ -e /sdcard/system.ext2 ] ; then
+    echo "Using uncompressed system"
+    losetup /dev/block/loop1 /sdcard/system.ext2
+    [ $? -eq 0 ] || fail "Failed to reach system.ext2 on SD Card"
+    e2fsck -y /dev/block/loop1
+    mount -t ext2 -o ro,noatime,nodiratime /dev/block/loop1 /system
+    [ $? -eq 0 ] || fail "Failed to mount /system"
+else
+    losetup /dev/block/loop1 /sdcard/system.img
+    [ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
+    mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
+    [ $? -eq 0 ] || fail "Failed to mount /system"
+fi
+
+if [ -d /sdcard/AndroidApps ] ; then
+    echo Copying Applications
+    if [ ! -d /data/app ] ; then
+        mkdir -m 0771 /data/app
+    fi
+    cp /sdcard/AndroidApps/* /data/app
+    chown -R 1000:1000 /data/app
+fi
+
+#swap file
+if [ ! -e /sdcard/swapfile ] ; then
+	echo "Creating swap"
+    dd if=/dev/zero of=/sdcard/swapfile bs=1048576 count=32
+    [ $? -eq 0 ] || fail "Failed to allocate the storage"
+    mkswap /sdcard/swapfile
+    [ $? -eq 0 ] || fail "Failed to initialize the swap file"
+fi
+echo "Turning on swap"
+swapon /sdcard/swapfile
+[ $? -eq 0 ] || fail "Couldn't activate the swap file"
+echo 20 > /proc/sys/vm/swappiness
+
+if [ ! -d /sdcard/media ] ; then
+    echo You have no media folder, please extract the resources to your SD card
+fi
+
+LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
+
+if [ "$LCDDENSITY" != "" ] ; then
+    echo "ro.sf.lcd_density=$LCDDENSITY" >> /default.prop
+    echo Setting ro.sf.lcd_density=$LCDDENSITY
+fi
+
+SQLITE3="/bin/sqlite3"
+DB="/data/data/com.android.providers.telephony/databases/telephony.db"
+if [ -e $DB ] ; then
+    if [ "`$SQLITE3 $DB 'SELECT numeric FROM carriers;' | grep 310995`" != "310995" ] ; then
+        echo Creating android apn
+        "$SQLITE3" "$DB" "INSERT INTO carriers VALUES(NULL, 'Android' , '310995' , '310' , '995' , 'internet' , '*' , '*' , '*' , NULL, NULL, NULL, NULL, 'null' , 'default' , 1);"
+    fi
+else
+    echo No telephony database. You must have a new data file. I will check for the android apn on the next reboot
+fi
+
+# backwards compatibility, instead of symlink in init.rc
+mount -t tmpfs -o size=1M tmpfs /etc
+cp -a /initetc/* etc
+cp -a /system/etc/* /etc
+# echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
+#ifconfig usb0 192.168.2.1 up
+#telnetd -b 192.168.2.1
+#chmod 4755 /bin/su
+#mkdir -m 0777 /smodem
+mount -t tmpfs -o size=10K tmpfs /smodem
+mknod -m 0777 /smodem/control p
+exec /init1

@@ -1,9 +1,0 @@
-debug
-defaultroute
-local
-usepeerdns
-noipdefault
-unit 0
-linkname gprs
-novj
-novjccomp

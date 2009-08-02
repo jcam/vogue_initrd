@@ -2,6 +2,7 @@
 mkdir -m 0777 /dev/block
 mknod -m 0666 /dev/block/loop0 b 7 0
 mknod -m 0666 /dev/block/loop1 b 7 1
+mknod -m 0666 /dev/block/loop2 b 7 2
 mknod -m 0666 /dev/block/mmcblk0 b 179 0
 mknod -m 0666 /dev/block/mmcblk0p1 b 179 1
 mknod -m 0666 /dev/block/mmcblk0p2 b 179 2
@@ -19,6 +20,3 @@ mknod -m 0444 /dev/zero c 1 5
 mknod -m 0644 /dev/ppp0 c 108 0
 mknod -m 0644 /dev/smd0 c 253 0
 mknod -m 0644 /dev/smd1 c 253 1
-
-mkdir -m 0777 /smodem
-mknod -m 0777 /smodem/control p
