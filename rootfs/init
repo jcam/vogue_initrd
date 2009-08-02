@@ -54,14 +54,17 @@ if [ $PARTITIONED = "0" ] ; then
     fi
 fi
 
-read -s -n1 -p "Press any key to start an automatic backup\n" -t 5
+read -s -n1 -p "Press any key to start an automatic backup" -t 5
 if [ "$?" == "0" ] ; then
+	echo ""
     echo "Starting Backup..."
     if [ ! -d /sdcard/backup ] ; then
         mkdir /sdcard/backup
     fi
     gzip -vc /sdcard/data.img > /sdcard/backup/data$(date +%Y-%m-%d).gz
     echo "...Done!"
+else
+	echo ""
 fi
 
 #mkdir -m 0755 /data
@@ -97,18 +100,21 @@ if [ -d /sdcard/AndroidApps ] ; then
     if [ ! -d /data/app ] ; then
         mkdir -m 0771 /data/app
     fi
-    cp /sdcard/AndroidApps/* /data/app
+    /bin/cp /sdcard/AndroidApps/* /data/app
     chown -R 1000:1000 /data/app
 fi
 
 #swap file
-if [ ! -e /sdcard/swapfile ] ; then
-	echo "Creating swap"
-    dd if=/dev/zero of=/sdcard/swapfile bs=1048576 count=32
-    [ $? -eq 0 ] || fail "Failed to allocate the storage"
-    mkswap /sdcard/swapfile
-    [ $? -eq 0 ] || fail "Failed to initialize the swap file"
+if [ -e /sdcard/swapfile ] ; then
+	rm /sdcard/swapfile
 fi
+
+echo "Creating swap"
+dd if=/dev/zero of=/sdcard/swapfile bs=1048576 count=32
+[ $? -eq 0 ] || fail "Failed to allocate the storage"
+mkswap /sdcard/swapfile
+[ $? -eq 0 ] || fail "Failed to initialize the swap file"
+
 echo "Turning on swap"
 swapon /sdcard/swapfile
 [ $? -eq 0 ] || fail "Couldn't activate the swap file"
@@ -117,6 +123,7 @@ echo 20 > /proc/sys/vm/swappiness
 if [ ! -d /sdcard/media ] ; then
     echo You have no media folder, please extract the resources to your SD card
 fi
+
 
 LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
 
@@ -136,15 +143,31 @@ else
     echo No telephony database. You must have a new data file. I will check for the android apn on the next reboot
 fi
 
-# backwards compatibility, instead of symlink in init.rc
-mount -t tmpfs -o size=1M tmpfs /etc
-cp -a /initetc/* etc
-cp -a /system/etc/* /etc
+rm -rf /data/etc
+mkdir -m 0755 /data/etc
+mount /data/etc /etc
+/bin/cp -a /initetc/* etc
+/bin/cp -a /system/etc/* /etc
+
+echo "Checking for hero..."
+if [ -e /system/app/HtcTwitter.apk ] ; then
+	echo "Hero build detected"
+	cp /init.hero.rc /etc/init.rc
+elif [ -e /system/rogers.build ] ; then
+	echo "Rogers build detected"
+	cp /init.rogers.rc /etc/init.rc
+else
+	echo "Hero/Rogers builds not found. Assuming Ion variant"
+	cp /init.ion.rc /etc/init.rc
+fi
+
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
 #ifconfig usb0 192.168.2.1 up
 #telnetd -b 192.168.2.1
 #chmod 4755 /bin/su
 #mkdir -m 0777 /smodem
-mount -t tmpfs -o size=10K tmpfs /smodem
+rm -rf /data/smodem
+mkdir -m 0755 /data/smodem
+mount /data/smodem /smodem
 mknod -m 0777 /smodem/control p
 exec /init1

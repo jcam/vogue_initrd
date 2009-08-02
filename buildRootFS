@@ -4,14 +4,19 @@ dd if=/dev/zero of=rootfs.img bs=1048576 count=10
 mkfs.ext2 -F rootfs.img
 mount -o loop rootfs.img /mnt
 cp -a rootfs/* /mnt
+chown -R 0:0 /mnt/*
 mkdir -m 0777 /mnt/cache
-mkdir -m 0755 /mnt/data
-mkdir -m 0777 /mnt/dev
+mkdir -m 0771 /mnt/data
+chown 1000:1000 /mnt/data
+mkdir -m 0755 /mnt/dev
 mkdir -m 0755 /mnt/etc
 mkdir -m 0755 /mnt/proc
 mkdir -m 0777 /mnt/sdcard
+mkdir -m 0771 /mnt/shared_prefs
+chown 1000:1000 /mnt/shared_prefs
 mkdir -m 0777 /mnt/smodem
+mkdir -m 01777 /mnt/sqlite_stmt_journals
 mkdir -m 0755 /mnt/sys
 mkdir -m 0755 /mnt/system
-chown -R 0:0 /mnt/*
+mkdir -m 0755 /mnt/tmp
 umount /mnt
