@@ -55,6 +55,11 @@ while true ; do
 			/bin/pppd /dev/smd1
 			if [ ! -e /etc/ppp/ppp-gprs.pid ] ; then
 				modem_log "Connection attempt FAILED!"
+				if [ -e /sys/class/vogue_hw/gsmphone ] ; then
+					/bin/echo -e "AT+CREG?\r" > /dev/smd0
+				else
+				    /bin/echo -e "AT+COPS?\r" > /dev/smd0
+				fi
 			else
 				modem_log "Connection attempt SUCCESSFUL!"
 				modem_log "Phone IP:  `/bin/ifconfig ppp0 | /bin/grep 'inet addr:' | /bin/cut -d':' -f2 | /bin/cut -d' ' -f1`"

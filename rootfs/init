@@ -153,9 +153,15 @@ echo "Checking for hero..."
 if [ -e /system/app/HtcTwitter.apk ] ; then
 	echo "Hero build detected"
 	cp /init.hero.rc /etc/init.rc
+elif [ -e /system/hero.build ] ; then
+	echo "Hero build detected"
+	cp /init.hero.rc /etc/init.rc
 elif [ -e /system/rogers.build ] ; then
 	echo "Rogers build detected"
 	cp /init.rogers.rc /etc/init.rc
+elif [ -e /system/custom.build ] ; then
+	echo "Custom init.rc detected"
+	cp /system/sysinit.rc /etc/init.rc
 else
 	echo "Hero/Rogers builds not found. Assuming Ion variant"
 	cp /init.ion.rc /etc/init.rc
