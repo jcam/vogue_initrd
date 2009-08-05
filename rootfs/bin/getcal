@@ -1,0 +1,4 @@
+#!/bin/sh
+dd if=/dev/mtd/mtd0ro of=/sdcard/tempcal bs=8192 count=1 skip=4736
+dd if=/sdcard/tempcal of=/sdcard/calibration bs=1 count=752 skip=64
+rm /sdcard/tempcal
