@@ -1,12 +1,15 @@
 #!/bin/sh
-#mkdir -m 0755 /proc
-mount -t proc proc /proc
-#mkdir -m 0755 /sys
-mount -t sysfs sys /sys
+PATH=/sbin:/system/sbin:/system/bin:/bin:/system/xbin:/system/xbin/bb:/data/local/bin
+
+
+/bin/echo "Rootfs loaded."
+
+/bin/mount -t proc proc /proc
+/bin/mount -t sysfs sys /sys
 
 fail() {
-    echo "Failed"
-    echo "$1"
+    /bin/echo "Failed"
+    /bin/echo "$1"
     exec /bin/sh
 }
 if [ -e /sys/class/vogue_hw/gsmphone ] ; then
