@@ -37,7 +37,7 @@ mount -t vfat -o fmask=0000,dmask=0000,rw,flush,noatime,nodiratime /dev/block/mm
 
 mkdir -m 0755 /rfs
 losetup /dev/block/loop2 /sdcard/rootfs.img
-[ $? -eq 0 ] || fail "Failed to find rootfs.img on SD Card"
+[ $? -eq 0 ] || fail "Failed to find rootfs.img on SD Card. You need to unzip a rootfs zip file to the root of your SD card."
 e2fsck -y /dev/block/loop2
 mount -t ext2 -o noatime,nodiratime,sync,ro /dev/block/loop2 /rfs
 [ $? -eq 0 ] || fail "Failed to mount /data"
