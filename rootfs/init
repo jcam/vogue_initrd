@@ -1,17 +1,35 @@
 #!/bin/sh
-PATH=/sbin:/system/sbin:/system/bin:/bin:/system/xbin:/system/xbin/bb:/data/local/bin
+fail() {
+    /bin/echo "Failed"
+    /bin/echo "$1"
+    exec /bin/sh
+}
 
+createswap() {
+	#swap file
+	if [ -e /sdcard/swapfile ] ; then
+		rm /sdcard/swapfile
+	fi
+
+	echo "Creating swap"
+	dd if=/dev/zero of=/sdcard/swapfile bs=1048576 count=32
+	[ $? -eq 0 ] || fail "Failed to allocate the storage"
+	mkswap /sdcard/swapfile
+	[ $? -eq 0 ] || fail "Failed to initialize the swap file"
+
+	echo "Turning on swap"
+	swapon /sdcard/swapfile
+	[ $? -eq 0 ] || fail "Couldn't activate the swap file"
+	echo 20 > /proc/sys/vm/swappiness
+}
+
+PATH=/sbin:/system/sbin:/system/bin:/bin:/system/xbin:/system/xbin/bb:/data/local/bin
 
 /bin/echo "Rootfs loaded."
 
 /bin/mount -t proc proc /proc
 /bin/mount -t sysfs sys /sys
 
-fail() {
-    /bin/echo "Failed"
-    /bin/echo "$1"
-    exec /bin/sh
-}
 if [ -e /sys/class/vogue_hw/gsmphone ] ; then
     echo "GSM phone found"
 fi
@@ -107,22 +125,6 @@ if [ -d /sdcard/AndroidApps ] ; then
     chown -R 1000:1000 /data/app
 fi
 
-#swap file
-if [ -e /sdcard/swapfile ] ; then
-	rm /sdcard/swapfile
-fi
-
-echo "Creating swap"
-dd if=/dev/zero of=/sdcard/swapfile bs=1048576 count=32
-[ $? -eq 0 ] || fail "Failed to allocate the storage"
-mkswap /sdcard/swapfile
-[ $? -eq 0 ] || fail "Failed to initialize the swap file"
-
-echo "Turning on swap"
-swapon /sdcard/swapfile
-[ $? -eq 0 ] || fail "Couldn't activate the swap file"
-echo 20 > /proc/sys/vm/swappiness
-
 if [ ! -d /sdcard/media ] ; then
     echo You have no media folder, please extract the resources to your SD card
 fi
@@ -149,8 +151,17 @@ fi
 rm -rf /data/etc
 mkdir -m 0755 /data/etc
 mount /data/etc /etc
-/bin/cp -a /initetc/* etc
 /bin/cp -a /system/etc/* /etc
+/bin/cp -a /initetc/* etc
+
+if [ ! -d /data/shared_prefs ] ; then
+	mkdir -m 0770 /data/shared_prefs
+fi
+chmod 0770 /data/shared_prefs
+chown 1000:1000 /data/shared_prefs
+mount /data/shared_prefs /shared_prefs
+
+mount /sdcard/cache /tmp
 
 echo "Checking for hero..."
 if [ -e /system/app/HtcTwitter.apk ] ; then
@@ -159,6 +170,7 @@ if [ -e /system/app/HtcTwitter.apk ] ; then
 elif [ -e /system/hero.build ] ; then
 	echo "Hero build detected"
 	cp /init.hero.rc /etc/init.rc
+	createswap
 elif [ -e /system/rogers.build ] ; then
 	echo "Rogers build detected"
 	cp /init.rogers.rc /etc/init.rc
