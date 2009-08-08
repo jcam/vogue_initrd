@@ -1,0 +1,174 @@
+#VOLUME_UP ?
+#VOLUME_DOWN ?
+##key 1
+key 2     1
+key 3     2
+key 4     3
+key 5     4
+key 6     5
+key 7     6
+key 8     7
+key 9     8
+key 10    9
+key 11    0
+key 12    MINUS
+key 13    EQUALS
+key 14    DEL
+# PTT button (top left)
+key 15    ALT_LEFT
+key 16    Q
+key 17    W
+key 18    E
+key 19    R
+key 20    T
+key 21    Y
+key 22    U
+key 23    I
+key 24    O
+key 25    P
+key 26    LEFT_BRACKET
+key 27    RIGHT_BRACKET
+key 28    ENTER
+##key 29
+key 30    A
+key 31    S
+key 32    D
+key 33    F
+key 34    G
+key 35    H
+key 36    J
+key 37    K
+key 38    L
+key 39    SEMICOLON
+key 40    APOSTROPHE
+##key 41    B
+key 42    SHIFT_LEFT
+key 43    BACKSLASH
+key 44    Z
+key 45    X
+key 46    C
+key 47    V
+key 48    B
+key 49    N
+key 50    M
+key 51    COMMA
+key 52    PERIOD
+key 53    SLASH
+key 54    SHIFT_RIGHT
+##key 55
+##key 56
+# SPACE (keyboard)
+key 57    SPACE
+# ???
+##key 58    
+##key 59
+##key 60
+##key 61
+##key 62
+##key 63    
+##key 64    
+##key 65    
+##key 66    
+##key 67    
+##key 68    
+##key 69    
+##key 70    
+##key 71    
+##key 72    
+##key 73    
+##key 74    
+##key 75    
+##key 76    
+##key 77    
+##key 78    
+##key 79    
+##key 80    
+##key 81    
+##key 82    
+##key 83    
+##key 84    
+##key 85    
+##key 86    
+##key 87    
+##key 88    
+##key 89    
+##key 90    
+##key 91    
+##key 92    
+##key 93    
+##key 94    
+##key 95    
+##key 96    
+##key 97    
+##key 98    
+##key 99    
+##key 100
+##key 101    
+# WWW key
+key 102   VOLUME_DOWN
+key 103   DPAD_UP           WAKE_DROPPED
+# page up (fn+up) - how to define??
+#key 104   PGUP
+key 105   DPAD_LEFT         WAKE_DROPPED
+key 106   DPAD_RIGHT        WAKE_DROPPED
+# end call
+key 107   ENDCALL           WAKE_DROPPED
+key 108   DPAD_DOWN         WAKE_DROPPED
+# page down (dn+down) - how to define??
+#key 109    PGDN
+##key 110 
+# DEL on keyboard (fn+backspace)
+key 111    DEL
+##key 112    2
+##key 113    5
+# left soft
+key 114   MENU
+# right soft
+key 115   MENU
+##key 116
+key 117   A
+key 118   B
+key 119   C
+key 120   D
+key 121   E
+key 122   F
+key 123   G
+key 124   H
+key 125   I
+key 126   J
+##key 127
+key 128   K
+key 129   L
+key 130   M
+key 131   N
+key 132   O
+key 133   P
+key 134   Q
+key 135   R
+key 136   S
+key 137   T
+key 138   U
+# Win-Key (front)
+key 139   HOME              WAKE_DROPPED
+key 140   V
+key 141   W
+key 142   X
+key 143   Y
+key 144   Z
+##key 150   
+# envelope (Mail) key
+key 155   VOLUME_UP
+# (ok) key on front
+key 158   BACK              WAKE_DROPPED
+##key 212   L
+##key 215   M
+##key 217   N
+##key 227   O
+##key 228   P
+##key 229
+##key 230
+# make call
+key 231   CALL              WAKE_DROPPED
+# (ok) key top left + on keyboard, DPAD center
+key 232   DPAD_CENTER       WAKE
+##key 399   R

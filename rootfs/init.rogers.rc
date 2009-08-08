@@ -306,9 +306,7 @@ service hsag /system/bin/sdptool add --channel=11 HSAG
 service installd /system/bin/installd
     socket installd stream 600 system system
 
-service wlan_loader /system/bin/wlan_loader \
-	-f /initetc/wifi/Fw1251r1c.bin -e /sdcard/calibration \
-	-i /initetc/wifi/tiwlan.ini
+service wlan_loader /etc/wifi/loadit
 	disabled
 	oneshot
 

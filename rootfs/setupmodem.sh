@@ -69,6 +69,8 @@ while true ; do
 		else
 			modem_log "pppd already running"
 		fi
+	elif [ "$CMD" = "killppp" ]; then
+		/bin/killall pppd
 
 	elif [ "$CMD" != "" ]; then
 		modem_log "Invalid command: $CMD"

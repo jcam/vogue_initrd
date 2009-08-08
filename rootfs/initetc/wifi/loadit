@@ -2,3 +2,4 @@
 dd if=/dev/mtd/mtd0ro of=/sdcard/tempcal bs=8192 count=1 skip=4736
 dd if=/sdcard/tempcal of=/sdcard/calibration bs=1 count=752 skip=64
 rm /sdcard/tempcal
+/etc/wifi/wlan_loader -f /etc/wifi/Fw1251r1c.bin -e /sdcard/calibration -i /etc/wifi/tiwlan.ini

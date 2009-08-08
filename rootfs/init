@@ -130,13 +130,6 @@ if [ ! -d /sdcard/media ] ; then
 fi
 
 
-LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
-
-if [ "$LCDDENSITY" != "" ] ; then
-    echo "ro.sf.lcd_density=$LCDDENSITY" >> /default.prop
-    echo Setting ro.sf.lcd_density=$LCDDENSITY
-fi
-
 SQLITE3="/bin/sqlite3"
 DB="/data/data/com.android.providers.telephony/databases/telephony.db"
 if [ -e $DB ] ; then
@@ -153,6 +146,13 @@ mkdir -m 0755 /data/etc
 mount /data/etc /etc
 /bin/cp -a /system/etc/* /etc
 /bin/cp -a /initetc/* etc
+
+LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
+
+if [ "$LCDDENSITY" != "" ] ; then
+    echo "ro.sf.lcd_density=$LCDDENSITY" >> /etc/default.prop
+    echo Setting ro.sf.lcd_density=$LCDDENSITY
+fi
 
 if [ ! -d /data/shared_prefs ] ; then
 	mkdir -m 0770 /data/shared_prefs
