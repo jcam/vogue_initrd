@@ -170,7 +170,6 @@ if [ -e /system/app/HtcTwitter.apk ] ; then
 elif [ -e /system/hero.build ] ; then
 	echo "Hero build detected"
 	cp /init.hero.rc /etc/init.rc
-	createswap
 elif [ -e /system/rogers.build ] ; then
 	echo "Rogers build detected"
 	cp /init.rogers.rc /etc/init.rc
@@ -181,6 +180,8 @@ else
 	echo "Hero/Rogers builds not found. Assuming Ion variant"
 	cp /init.ion.rc /etc/init.rc
 fi
+
+/bin/ramzswap
 
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
 #ifconfig usb0 192.168.2.1 up
