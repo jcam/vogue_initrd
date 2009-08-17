@@ -9,16 +9,9 @@ mknod -m 0666 /dev/block/ramzswap0 b 254 0
 [ $? -eq 0 ] || fail "Failed to create the block device"
 
 insmod /lib/modules/lzo_compress.ko
-[ $? -eq 0 ] || fail "Failed to load lzo_compress.ko"
-
 insmod /lib/modules/lzo_decompress.ko
-[ $? -eq 0 ] || fail "Failed to load lzo_decompress.ko"
-
 insmod /lib/modules/xvmalloc.ko
-[ $? -eq 0 ] || fail "Failed to load xvmalloc.ko"
-
 insmod /lib/modules/ramzswap.ko
-[ $? -eq 0 ] || fail "Failed to allocate the storage"
 
 #Turn on swap
 sleep 2
