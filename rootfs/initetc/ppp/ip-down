@@ -4,11 +4,6 @@ ppp0)
 	/bin/echo -e "PPP connection went down" >> /smodem/ppp.log
 	/bin/echo -e "Done!" >> /smodem/ppp.log
 	/bin/echo "0" > /smodem/live
-	if [ -e /sys/class/vogue_hw/gsmphone ] ; then
-		/bin/echo -e "AT+CREG?\r" > /dev/smd0
-	else
-		/bin/echo -e "AT+COPS?\r" > /dev/smd0
-	fi
 	;;
 ppp1)
 	echo 0 > /proc/sys/net/ipv4/ip_forward;
