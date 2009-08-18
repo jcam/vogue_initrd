@@ -1,0 +1,3 @@
+#!/bin/sh
+/bin/swapoff /dev/block/ramzswap0
+/bin/swapon /dev/block/ramzswap0
