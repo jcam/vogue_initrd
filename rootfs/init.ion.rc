@@ -197,8 +197,8 @@ on boot
 	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
 	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
 	chmod 0660				  /sys/class/rfkill/rfkill0/state
-	chown bluetooth bluetooth /dev/ttyHS0
-	chmod 0666				  /dev/ttyHS0
+	chown bluetooth bluetooth /dev/ttyMSM0
+	chmod 0666				  /dev/ttyMSM0
     chown root radio /proc/cmdline
 
 # Define TCP buffer sizes for various networks
@@ -273,7 +273,7 @@ service bootsound /system/bin/playmp3
     disabled
 
 service hciattach /system/bin/hciattach \
-	-n -s 115200 /dev/ttyHS0 texas 4000000 flow
+	-n -s 115200 /dev/ttyMSM0 texas
 	user bluetooth
 	group bluetooth net_bt_admin
 	disabled
