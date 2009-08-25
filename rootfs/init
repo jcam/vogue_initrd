@@ -75,18 +75,18 @@ if [ $PARTITIONED = "0" ] ; then
     fi
 fi
 
-read -s -n1 -p "Press any key to start an automatic backup" -t 5
-if [ "$?" == "0" ] ; then
-	echo ""
-    echo "Starting Backup..."
-    if [ ! -d /sdcard/backup ] ; then
-        mkdir /sdcard/backup
-    fi
-    gzip -vc /sdcard/data.img > /sdcard/backup/data$(date +%Y-%m-%d).gz
-    echo "...Done!"
-else
-	echo ""
-fi
+#read -s -n1 -p "Press any key to start an automatic backup" -t 5
+#if [ "$?" == "0" ] ; then
+#	echo ""
+#    echo "Starting Backup..."
+#    if [ ! -d /sdcard/backup ] ; then
+#        mkdir /sdcard/backup
+#    fi
+#    gzip -vc /sdcard/data.img > /sdcard/backup/data$(date +%Y-%m-%d).gz
+#    echo "...Done!"
+#else
+#	echo ""
+#fi
 
 #mkdir -m 0755 /data
 if [ $PARTITIONED = "0" ] ; then
