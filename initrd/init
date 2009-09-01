@@ -18,21 +18,17 @@ while [ ! -e /sys/block/mmcblk0 ] ; do
     sleep 1
 done
 
-if [ ! -e /sys/block/mmcblk0/mmcblk0p1 ] ; then
-    fail "No partition found on SD card"
-fi
+partition=mmcblk0p1
 
-#if [ "`cat /sys/block/mmcblk0/mmcblk0p2/size`" = "132240" ] ; then
-#	PARTITIONED=1
-#	echo "Data Partition Found"
-#else
-    PARTITIONED=0
-#fi
+# Try unpartitioned card
+if [ ! -e /sys/block/mmcblk0/$partition ] ; then
+    partition=mmcblk0
+fi
 
 mkdir -m 0777 /sdcard
 echo "Running an fsck on the SD card"
-dosfsck -y /dev/block/mmcblk0p1
-mount -t vfat -o fmask=0000,dmask=0000,rw,flush,noatime,nodiratime /dev/block/mmcblk0p1 /sdcard
+dosfsck -y /dev/block/$partition
+mount -t vfat -o fmask=0000,dmask=0000,rw,flush,noatime,nodiratime /dev/block/$partition /sdcard
 [ $? -eq 0 ] || fail "Failed to mount the SD card. Cannot continue."
 
 mkdir -m 0755 /rfs
