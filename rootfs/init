@@ -5,24 +5,6 @@ fail() {
     exec /bin/sh
 }
 
-createswap() {
-	#swap file
-	if [ -e /sdcard/swapfile ] ; then
-		rm /sdcard/swapfile
-	fi
-
-	echo "Creating swap"
-	dd if=/dev/zero of=/sdcard/swapfile bs=1048576 count=32
-	[ $? -eq 0 ] || fail "Failed to allocate the storage"
-	mkswap /sdcard/swapfile
-	[ $? -eq 0 ] || fail "Failed to initialize the swap file"
-
-	echo "Turning on swap"
-	swapon /sdcard/swapfile
-	[ $? -eq 0 ] || fail "Couldn't activate the swap file"
-	echo 20 > /proc/sys/vm/swappiness
-}
-
 PATH=/sbin:/system/sbin:/system/bin:/bin:/system/xbin:/system/xbin/bb:/data/local/bin
 
 /bin/echo "Rootfs loaded."
@@ -116,12 +98,19 @@ if [ -e /sdcard/system.ext2 ] ; then
     e2fsck -y /dev/block/loop1
     mount -t ext2 -o ro,noatime,nodiratime /dev/block/loop1 /system
     [ $? -eq 0 ] || fail "Failed to mount /system"
-else
-    losetup /dev/block/loop1 /sdcard/system.img
-    [ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
-    mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
+elif [ -e /sdcard/system.sqsh ] ; then
+    echo "Using SquashFS system"
+    losetup /dev/block/loop1 /sdcard/system.sqsh
+    [ $? -eq 0 ] || fail "Failed to find system.sqsh on SD Card"
+    mount -t squashfs -o ro,noatime,nodiratime /dev/block/loop1 /system
     [ $? -eq 0 ] || fail "Failed to mount /system"
+else
+  losetup /dev/block/loop1 /sdcard/system.img
+  [ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
+  mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
+  [ $? -eq 0 ] || fail "Failed to mount /system"
 fi
+
 
 if [ -d /sdcard/AndroidApps ] ; then
     echo Copying Applications
@@ -170,25 +159,58 @@ mount /data/shared_prefs /shared_prefs
 
 mount /sdcard/cache /tmp
 
+### Is this a Kaiser?
+if [ "`cat /proc/cpuinfo|grep -o Kaiser`" = "Kaiser" ]; then
+	echo "KAISER detected"
+        KAISER=1
+else
+        echo "VOGUE detected"
+        KAISER=0
+fi
+
+
 echo "Checking for hero..."
 if [ -e /system/app/HtcTwitter.apk ] ; then
 	echo "Hero build detected"
-	cp /init.hero.rc /etc/init.rc
+	if [ $KAISER = "1" ] ; then
+		cp /init.hero.kaiser.rc /etc/init.rc
+	else
+		cp /init.hero.rc /etc/init.rc
+	fi
+	/bin/userinit.sh -c /sdcard/hero.user.conf
 elif [ -e /system/hero.build ] ; then
-	echo "Hero build detected"
-	cp /init.hero.rc /etc/init.rc
+        echo "Hero build detected"
+        if [ $KAISER = "1" ] ; then
+                cp /init.hero.kaiser.rc /etc/init.rc
+        else
+                cp /init.hero.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/hero.user.conf
 elif [ -e /system/rogers.build ] ; then
 	echo "Rogers build detected"
-	cp /init.rogers.rc /etc/init.rc
+        if [ $KAISER = "1" ] ; then
+                cp /init.rogers.kaiser.rc /etc/init.rc
+        else
+                cp /init.rogers.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/rogers.user.conf
 elif [ -e /system/custom.build ] ; then
 	echo "Custom init.rc detected"
-	cp /system/sysinit.rc /etc/init.rc
+        if [ $KAISER = "1" ] ; then
+                cp /system/sysinit.kaiser.rc /etc/init.rc
+        else
+                cp /system/sysinit.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/hero.user.conf
 else
 	echo "Hero/Rogers builds not found. Assuming Ion variant"
-	cp /init.ion.rc /etc/init.rc
+        if [ $KAISER = "1" ] ; then
+                cp /init.ion.kaiser.rc /etc/init.rc
+        else
+                cp /init.ion.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/ion.user.conf
 fi
-
-/bin/ramzswap
 
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
 #ifconfig usb0 192.168.2.1 up
