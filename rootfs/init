@@ -141,7 +141,7 @@ rm -rf /data/etc
 mkdir -m 0755 /data/etc
 mount /data/etc /etc
 /bin/cp -a /system/etc/* /etc
-/bin/cp -a /initetc/* etc
+/bin/cp -ar /initetc/* etc
 
 LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
 
@@ -166,12 +166,17 @@ if [ "`cat /proc/cpuinfo|grep -o Kaiser`" = "Kaiser" ]; then
 	echo "KAISER detected"
         KAISER=1
 	sed -i s/^#wifi/wifi/ /tmp/build.prop	
+	mount --bind /etc/wifi /system/lib/modules
 else
         echo "VOGUE detected"
         KAISER=0
 	sed -i s/^wifi/#wifi/ /tmp/build.prop
 fi
 mount --bind /tmp/build.prop /system/build.prop
+
+### Fix su on some builds...
+mount --bind /bin/su /system/bin/su
+mount --bind /bin/su /system/xbin/su
 
 
 echo "Checking for hero..."
