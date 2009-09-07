@@ -159,14 +159,19 @@ mount /data/shared_prefs /shared_prefs
 
 mount /sdcard/cache /tmp
 
+cp /system/build.prop /tmp/build.prop
+
 ### Is this a Kaiser?
 if [ "`cat /proc/cpuinfo|grep -o Kaiser`" = "Kaiser" ]; then
 	echo "KAISER detected"
         KAISER=1
+	sed -i s/^#wifi/wifi/ /tmp/build.prop	
 else
         echo "VOGUE detected"
         KAISER=0
+	sed -i s/^wifi/#wifi/ /tmp/build.prop
 fi
+mount --bind /tmp/build.prop /system/build.prop
 
 
 echo "Checking for hero..."
