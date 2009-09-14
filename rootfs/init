@@ -137,11 +137,11 @@ else
     echo No telephony database. You must have a new data file. I will check for the android apn on the next reboot
 fi
 
-rm -rf /data/etc
-mkdir -m 0755 /data/etc
+/bin/rm -rf /data/etc
+/bin/mkdir -m 0755 /data/etc
 mount /data/etc /etc
-/bin/cp -a /system/etc/* /etc
-/bin/cp -ar /initetc/* etc
+cp -a /system/etc/* /etc
+cp -ar /initetc/* etc
 
 LCDDENSITY=`/bin/grep -o "lcd.density=.*" /proc/cmdline | /bin/sed -e "s/.*lcd.density=//g" -e "s/ .*//g"`
 
@@ -166,7 +166,20 @@ if [ "`cat /proc/cpuinfo|grep -o Kaiser`" = "Kaiser" ]; then
 	echo "KAISER detected"
         KAISER=1
 	sed -i s/^#wifi/wifi/ /tmp/build.prop	
+	if [ "`grep -c ^wifi /tmp/build.prop`" != "2" ]; then
+	   echo "wifi.interface = tiwlan0" >> /tmp/build.prop
+	   echo "wifi.supplicant_scan_interval = 45" >> /tmp/build.prop
+	fi
 	mount --bind /etc/wifi /system/lib/modules
+elif [ "`cat /proc/cpuinfo|grep -o Polaris`" = "Polaris" ]; then
+        echo "POLARIS detected"
+        KAISER=1
+        sed -i s/^#wifi/wifi/ /tmp/build.prop
+        if [ "`grep -c ^wifi /tmp/build.prop`" != "2" ]; then
+           echo "wifi.interface = tiwlan0" >> /tmp/build.prop
+           echo "wifi.supplicant_scan_interval = 45" >> /tmp/build.prop
+        fi
+        mount --bind /etc/wifi /system/lib/modules
 else
         echo "VOGUE detected"
         KAISER=0
@@ -204,6 +217,22 @@ elif [ -e /system/rogers.build ] ; then
                 cp /init.rogers.rc /etc/init.rc
         fi
 	/bin/userinit.sh -c /sdcard/rogers.user.conf
+elif [ -e /system/xrom.build ] ; then
+	echo "xROM build detected"
+        if [ $KAISER = "1" ] ; then
+                cp /init.xrom.kaiser.rc /etc/init.rc
+        else
+                cp /init.xrom.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/xrom.user.conf
+elif [ -e /system/cyanogen.build ] ; then
+	echo "cyanogen experimental detected.....eating donuts"
+        if [ $KAISER = "1" ] ; then
+                cp /init.cyanogen.kaiser.rc /etc/init.rc
+        else
+                cp /init.cyanogen.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/cyanogen.user.conf
 elif [ -e /system/custom.build ] ; then
 	echo "Custom init.rc detected"
         if [ $KAISER = "1" ] ; then
@@ -227,8 +256,8 @@ fi
 #telnetd -b 192.168.2.1
 #chmod 4755 /bin/su
 #mkdir -m 0777 /smodem
-rm -rf /data/smodem
-mkdir -m 0755 /data/smodem
+/bin/rm -rf /data/smodem
+/bin/mkdir -m 0755 /data/smodem
 mount /data/smodem /smodem
-mknod -m 0777 /smodem/control p
+/bin/mknod -m 0777 /smodem/control p
 exec /init1

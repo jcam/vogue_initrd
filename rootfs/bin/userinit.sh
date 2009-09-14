@@ -86,7 +86,9 @@ GET_USER_CONF() {
 	if [ -e ${CONF_FILE} ]; then
 
 		### clean windows format if needed
-		dos2unix $CONF_FILE
+		if [ "`grep -c  $CONF_FILE`" != "0" ]; then
+			dos2unix $CONF_FILE
+		fi
 
 		while read inputline;
 		do
@@ -211,10 +213,13 @@ renicerloop()
 {
 while [ 1 ]
 do
-        renice -20 `pidof com.android.mms`
-        renice -19 `pidof com.android.phone`
-        renice -18 `pidof mediaserver`
-        renice 0 `pidof com.google.process.gapps`
+        renice -18 `pidof com.android.mms`
+	renice  5  `pidof com.google.process.gapps`
+	renice -18 `pidof com.android.phone`
+	renice -18 `pidof android.process.media`
+	renice -18 `pidof mediaserver`
+	renice -16 `pidof com.htc.launcher`
+	renice -15 `pidof com.htc.music`
         sleep 500
 done
 }
