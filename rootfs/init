@@ -193,15 +193,7 @@ mount --bind /bin/su /system/xbin/su
 
 
 echo "Checking for hero..."
-if [ -e /system/app/HtcTwitter.apk ] ; then
-	echo "Hero build detected"
-	if [ $KAISER = "1" ] ; then
-		cp /init.hero.kaiser.rc /etc/init.rc
-	else
-		cp /init.hero.rc /etc/init.rc
-	fi
-	/bin/userinit.sh -c /sdcard/hero.user.conf
-elif [ -e /system/hero.build ] ; then
+if [ -e /system/hero.build ] ; then
         echo "Hero build detected"
         if [ $KAISER = "1" ] ; then
                 cp /init.hero.kaiser.rc /etc/init.rc

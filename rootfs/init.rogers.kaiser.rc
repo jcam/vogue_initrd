@@ -6,14 +6,14 @@ sysclktz 0
 loglevel 3
 
 # setup the global environment
-    export PATH /sbin:/system/sbin:/system/bin:/bin:/system/xbin:/system/xbin/bb:/data/local/bin
-    export LD_LIBRARY_PATH /lib:/system/lib
+    export PATH /sbin:/system/sbin:/system/bin:/system/xbin:/bin:/usr/bin:/usr/sbin:/data/expstick/bin:/data/expstick/xbin:/data/expstick/xbin/bb:/data/expstick/ebin
+    export LD_LIBRARY_PATH /system/lib:/data/expstick/lib
     export ANDROID_BOOTLOGO 1
     export ANDROID_ROOT /system
     export ANDROID_ASSETS /system/app
     export ANDROID_DATA /data
     export EXTERNAL_STORAGE /sdcard
-    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/com.htc.framework.jar:/system/framework/com.htc.android.pimlib.jar
+    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/com.htc.framework.jar:/system/framework/com.htc.android.pimlib.jar:/system/framework/com.htc.android.easopen.jar
 
 # Backward compatibility
 #    symlink /system/etc /etc
@@ -126,13 +126,13 @@ on boot
 
 # Define the memory thresholds at which the above process classes will
 # be killed.  These numbers are in pages (4k).
-    setprop ro.FOREGROUND_APP_MEM 1536
-    setprop ro.VISIBLE_APP_MEM 2048
-    setprop ro.SECONDARY_SERVER_MEM 4096
-    setprop ro.HOME_APP_MEM 4096
-    setprop ro.HIDDEN_APP_MEM 5120
-    setprop ro.CONTENT_PROVIDER_MEM 5632
-    setprop ro.EMPTY_APP_MEM 6144
+    setprop ro.FOREGROUND_APP_MEM 3072
+    setprop ro.VISIBLE_APP_MEM 4096
+    setprop ro.SECONDARY_SERVER_MEM 8192
+    setprop ro.HOME_APP_MEM 8192
+    setprop ro.HIDDEN_APP_MEM 7120
+    setprop ro.CONTENT_PROVIDER_MEM 11264
+    setprop ro.EMPTY_APP_MEM 12288
 
 # Write value must be consistent with the above properties.
 # Note that the driver only supports 6 slots, so we have HOME_APP at the
@@ -140,7 +140,7 @@ on boot
     write /sys/module/lowmemorykiller/parameters/adj 0,1,2,7,14,15
 
     #write /proc/sys/vm/overcommit_memory 1     # now in *.user.conf
-    write /sys/module/lowmemorykiller/parameters/minfree 1536,2048,4096,5120,5632,6144
+    write /sys/module/lowmemorykiller/parameters/minfree 3072,4096,8192,7120,11264,12288
     write /proc/sys/vm/min_free_order_shift 4
 
     # Set init its forked children's oom_adj.
