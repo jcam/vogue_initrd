@@ -57,7 +57,7 @@ fi
 if [ $PARTITIONED = "0" ] ; then
     if [ ! -e /sdcard/data.img ] ; then
         echo "Creating a new Data store"
-        dd if=/dev/zero of=/sdcard/data.img bs=1048576 count=128
+        dd if=/dev/zero of=/sdcard/data.img bs=1048576 count=256
         [ $? -eq 0 ] || fail "Failed to allocate the storage"
         mke2fs -F /sdcard/data.img
         [ $? -eq 0 ] || fail "Failed to format the storage"
