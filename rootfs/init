@@ -96,7 +96,7 @@ if [ -e /sdcard/system.ext2 ] ; then
     losetup /dev/block/loop1 /sdcard/system.ext2
     [ $? -eq 0 ] || fail "Failed to reach system.ext2 on SD Card"
     e2fsck -y /dev/block/loop1
-    mount -t ext2 -o ro,noatime,nodiratime /dev/block/loop1 /system
+    mount -t ext2 -o noatime,nodiratime /dev/block/loop1 /system
     [ $? -eq 0 ] || fail "Failed to mount /system"
 elif [ -e /sdcard/system.sqsh ] ; then
     echo "Using SquashFS system"
@@ -192,7 +192,7 @@ mount --bind /bin/su /system/bin/su
 mount --bind /bin/su /system/xbin/su
 
 
-echo "Checking for hero..."
+echo "Checking for build type..."
 if [ -e /system/hero.build ] ; then
         echo "Hero build detected"
         if [ $KAISER = "1" ] ; then
@@ -200,15 +200,24 @@ if [ -e /system/hero.build ] ; then
         else
                 cp /init.hero.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/hero.user.conf
-elif [ -e /system/rogers.build ] ; then
-	echo "Rogers build detected"
+	/bin/userinit.sh -c /sdcard/conf/hero.user.conf
+elif [ -e /system/tattoo.build ] ; then
+	echo "Tattoo build detected"
         if [ $KAISER = "1" ] ; then
-                cp /init.rogers.kaiser.rc /etc/init.rc
+                cp /init.tattoo.kaiser.rc /etc/init.rc
         else
-                cp /init.rogers.rc /etc/init.rc
+                cp /init.tattoo.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/rogers.user.conf
+	/bin/userinit.sh -c /sdcard/conf/tattoo.user.conf
+elif [ -e /system/donut.build ] ; then
+	echo "Donut build detected"
+        if [ $KAISER = "1" ] ; then
+                cp /init.donut.kaiser.rc /etc/init.rc
+        else
+                cp /init.donut.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/conf/donut.user.conf
+
 elif [ -e /system/xrom.build ] ; then
 	echo "xROM build detected"
         if [ $KAISER = "1" ] ; then
@@ -216,7 +225,15 @@ elif [ -e /system/xrom.build ] ; then
         else
                 cp /init.xrom.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/xrom.user.conf
+	/bin/userinit.sh -c /sdcard/conf/xrom.user.conf
+elif [ -e /system/rogers.build ] ; then
+	echo "Rogers build detected"
+        if [ $KAISER = "1" ] ; then
+                cp /init.rogers.kaiser.rc /etc/init.rc
+        else
+                cp /init.rogers.rc /etc/init.rc
+        fi
+	/bin/userinit.sh -c /sdcard/conf/rogers.user.conf
 elif [ -e /system/cyanogen.build ] ; then
 	echo "cyanogen experimental detected.....eating donuts"
         if [ $KAISER = "1" ] ; then
@@ -224,7 +241,7 @@ elif [ -e /system/cyanogen.build ] ; then
         else
                 cp /init.cyanogen.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/cyanogen.user.conf
+	/bin/userinit.sh -c /sdcard/conf/cyanogen.user.conf
 elif [ -e /system/custom.build ] ; then
 	echo "Custom init.rc detected"
         if [ $KAISER = "1" ] ; then
@@ -232,7 +249,7 @@ elif [ -e /system/custom.build ] ; then
         else
                 cp /system/sysinit.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/hero.user.conf
+	/bin/userinit.sh -c /sdcard/conf/hero.user.conf
 else
 	echo "Hero/Rogers builds not found. Assuming Ion variant"
         if [ $KAISER = "1" ] ; then
@@ -240,7 +257,7 @@ else
         else
                 cp /init.ion.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/ion.user.conf
+	/bin/userinit.sh -c /sdcard/conf/ion.user.conf
 fi
 
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
