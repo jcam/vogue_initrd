@@ -160,7 +160,7 @@ mount /data/shared_prefs /shared_prefs
 mount /sdcard/cache /tmp
 
 cp /system/build.prop /tmp/build.prop
-
+DIAMOND=0
 ### Is this a Kaiser?
 if [ "`cat /proc/cpuinfo|grep -o Kaiser`" = "Kaiser" ]; then
 	echo "KAISER detected"
@@ -180,6 +180,15 @@ elif [ "`cat /proc/cpuinfo|grep -o Polaris`" = "Polaris" ]; then
            echo "wifi.supplicant_scan_interval = 45" >> /tmp/build.prop
         fi
         mount --bind /etc/wifi /system/lib/modules
+elif [ "`cat /proc/cpuinfo|grep -o Diamond`" = "Diamond" ]; then
+        echo "DIAMOND detected"
+        DIAMOND=1
+        sed -i s/^#wifi/wifi/ /tmp/build.prop
+        if [ "`grep -c ^wifi /tmp/build.prop`" != "2" ]; then
+           echo "wifi.interface = tiwlan0" >> /tmp/build.prop
+           echo "wifi.supplicant_scan_interval = 45" >> /tmp/build.prop
+        fi
+        mount --bind /etc/wifi /system/lib/modules
 else
         echo "VOGUE detected"
         KAISER=0
@@ -190,7 +199,6 @@ mount --bind /tmp/build.prop /system/build.prop
 ### Fix su on some builds...
 mount --bind /bin/su /system/bin/su
 mount --bind /bin/su /system/xbin/su
-
 
 echo "Checking for build type..."
 if [ -e /system/hero.build ] ; then
@@ -257,6 +265,9 @@ else
         else
                 cp /init.ion.rc /etc/init.rc
         fi
+	if [ $DIAMOND = "1" ] ; then
+		cp /init.ion.diamond.rc /etc/init.rc
+	fi
 	/bin/userinit.sh -c /sdcard/conf/ion.user.conf
 fi
 
