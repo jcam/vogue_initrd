@@ -20,4 +20,5 @@ mkdir -m 0755 /mnt/sys
 mkdir -m 0755 /mnt/system
 mkdir -m 0755 /mnt/tmp
 chmod 4755 /mnt/bin/su
+chmod 4755 /mnt/bin/pppd
 umount /mnt

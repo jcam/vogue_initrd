@@ -217,8 +217,8 @@ on boot
 
 ## Daemon processes to be run by init.
 ##
-service setupmodem /setupmodem.sh
-    console
+#service setupmodem /setupmodem.sh
+#    console
 
 service console /system/bin/sh
     console
