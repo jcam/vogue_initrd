@@ -78,13 +78,14 @@ loglevel 3
 # create basic filesystem structure
     mkdir /data/misc 01771 system misc
     mkdir /data/misc/hcid 0770 bluetooth bluetooth
+        mkdir /data/misc/wifi 0770 wifi wifi
+        mkdir /data/misc/wifi/sockets 0770 wifi wifi
+        mkdir /data/misc/dhcp 0770 dhcp dhcp
+        chown dhcp dhcp /data/misc/dhcp
+        chmod 0660 /data/misc/wifi/wpa_supplicant.conf
     mkdir /data/misc/keystore 0770 keystore keystore
     mkdir /data/misc/vpn 0770 system system
     mkdir /data/misc/vpn/profiles 0770 system system
-    # give system access to wpa_supplicant.conf for backup and restore
-    mkdir /data/misc/wifi 0770 wifi wifi
-    chmod 0770 /data/misc/wifi
-    chmod 0660 /data/misc/wifi/wpa_supplicant.conf
     mkdir /data/local 0771 shell shell
     mkdir /data/local/tmp 0771 shell shell
     mkdir /data/data 0771 system system
@@ -311,6 +312,22 @@ service hsag /system/bin/sdptool add --channel=11 HSAG
 
 service installd /system/bin/installd
     socket installd stream 600 system system
+
+service wlan_loader /etc/wifi/loadit
+        disabled
+        oneshot
+
+service wpa_supplicant /system/bin/wpa_supplicant \
+        -Dtiwlan0 -itiwlan0 -c/data/misc/wifi/wpa_supplicant.conf
+        user wifi
+        group wifi inet
+        socket wpa_tiwlan0 dgram 660 wifi wifi
+        disabled
+        oneshot
+
+service dhcpcd /system/bin/dhcpcd -BKL tiwlan0
+        disabled
+        oneshot
 
 service racoon /system/bin/racoon
     socket racoon stream 600 system system
