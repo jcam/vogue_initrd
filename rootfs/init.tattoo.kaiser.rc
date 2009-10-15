@@ -76,7 +76,8 @@ loglevel 3
         mkdir /data/misc/dhcp 0770 dhcp dhcp
         chown dhcp dhcp /data/misc/dhcp
 	chmod 0660 /data/misc/wifi/wpa_supplicant.conf
-    mkdir /data/misc/keystore 0770 keystore keystore
+    mkdir /data/misc/keystore 0776 keystore keystore
+    chmod 0776 /data/misc/keystore
     mkdir /data/misc/vpn 0770 system system
     mkdir /data/misc/vpn/profiles 0770 system system
     mkdir /data/local 0771 shell shell
