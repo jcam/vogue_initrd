@@ -57,6 +57,7 @@ loglevel 3
     chown root radio /etc/ppp/pap-secrets
     chown root radio /etc/ppp/chap-secrets
     chown root radio /etc/ppp/options.smd1
+    chmod 0666 /dev/input/event0
 	chmod 0775 /etc/ppp/pap-secrets
 	chmod 0775 /etc/ppp/chap-secrets
 	chmod 0775 /etc/ppp/options.smd1

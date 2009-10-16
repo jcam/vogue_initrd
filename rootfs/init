@@ -260,6 +260,11 @@ elif [ -e /system/custom.build ] ; then
 	/bin/userinit.sh -c /sdcard/conf/hero.user.conf
 else
 	echo "Hero/Rogers builds not found. Assuming Ion variant"
+
+	# for the fake sensors library
+	mount /lib/hw /system/lib/hw -o loop
+	chmod 666 /dev/input/event0
+
         if [ $KAISER = "1" ] ; then
                 cp /init.ion.kaiser.rc /etc/init.rc
         else
