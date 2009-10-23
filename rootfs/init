@@ -225,7 +225,14 @@ elif [ -e /system/donut.build ] ; then
                 cp /init.donut.rc /etc/init.rc
         fi
 	/bin/userinit.sh -c /sdcard/conf/donut.user.conf
-
+elif [ -e /system/lib/donut ] ; then
+        echo "Donut build detected"
+        if [ $KAISER = "1" ] ; then
+                cp /init.donut.kaiser.rc /etc/init.rc
+        else
+                cp /init.donut.rc /etc/init.rc
+        fi
+        /bin/userinit.sh -c /sdcard/conf/donut.user.conf
 elif [ -e /system/xrom.build ] ; then
 	echo "xROM build detected"
         if [ $KAISER = "1" ] ; then
