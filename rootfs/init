@@ -38,48 +38,39 @@ fi
 #mkdir -m 0777 /cache
 mount /sdcard/cache /cache
 
-if [ -e /sdcard/data.gz ] ; then
+card=/sdcard
+if [ -d /sdcard/android ] ; then
+    card=/sdcard/android
+fi
+
+if [ -e $card/data.gz ] ; then
     echo "Please wait... extracting Data Image"
     if [ $PARTITIONED = "0" ] ; then
-        if [ -e /sdcard/data.img ] ; then
-            rm /sdcard/data.img
+        if [ -e $card/data.img ] ; then
+            rm $card/data.img
         fi
-        gzip -df /sdcard/data.gz
+        gzip -df $card/data.gz
         [ $? -eq 0 ] || fail "Failed to extract Data Image"
-        mv /sdcard/data /sdcard/data.img
+        mv $card/data $card/data.img
     else
-        gzip -cd /sdcard/data.gz > /dev/block/mmcblk0p2
-        rm /sdcard/data.gz
+        gzip -cd $card/data.gz > /dev/block/mmcblk0p2
+        rm $card/data.gz
     fi
     echo "done"
 fi
 
 if [ $PARTITIONED = "0" ] ; then
-    if [ ! -e /sdcard/data.img ] ; then
+    if [ ! -e $card/data.img ] ; then
         echo "Creating a new Data store"
-        dd if=/dev/zero of=/sdcard/data.img bs=1048576 count=256
+        dd if=/dev/zero of=$card/data.img bs=1048576 count=256
         [ $? -eq 0 ] || fail "Failed to allocate the storage"
-        mke2fs -F /sdcard/data.img
+        mke2fs -F $card/data.img
         [ $? -eq 0 ] || fail "Failed to format the storage"
     fi
 fi
 
-#read -s -n1 -p "Press any key to start an automatic backup" -t 5
-#if [ "$?" == "0" ] ; then
-#	echo ""
-#    echo "Starting Backup..."
-#    if [ ! -d /sdcard/backup ] ; then
-#        mkdir /sdcard/backup
-#    fi
-#    gzip -vc /sdcard/data.img > /sdcard/backup/data$(date +%Y-%m-%d).gz
-#    echo "...Done!"
-#else
-#	echo ""
-#fi
-
-#mkdir -m 0755 /data
 if [ $PARTITIONED = "0" ] ; then
-    losetup /dev/block/loop0 /sdcard/data.img
+    losetup /dev/block/loop0 $card/data.img
     [ $? -eq 0 ] || fail "Failed to find data.img on SD Card"
     e2fsck -y /dev/block/loop0
     mount -t ext2 -o noatime,nodiratime,sync /dev/block/loop0 /data
@@ -91,21 +82,21 @@ fi
 
 
 #mkdir -m 0755 /system
-if [ -e /sdcard/system.ext2 ] ; then
+if [ -e $card/system.ext2 ] ; then
     echo "Using uncompressed system"
-    losetup /dev/block/loop1 /sdcard/system.ext2
+    losetup /dev/block/loop1 $card/system.ext2
     [ $? -eq 0 ] || fail "Failed to reach system.ext2 on SD Card"
     e2fsck -y /dev/block/loop1
     mount -t ext2 -o noatime,nodiratime /dev/block/loop1 /system
     [ $? -eq 0 ] || fail "Failed to mount /system"
-elif [ -e /sdcard/system.sqsh ] ; then
+elif [ -e $card/system.sqsh ] ; then
     echo "Using SquashFS system"
-    losetup /dev/block/loop1 /sdcard/system.sqsh
+    losetup /dev/block/loop1 $card/system.sqsh
     [ $? -eq 0 ] || fail "Failed to find system.sqsh on SD Card"
     mount -t squashfs -o ro,noatime,nodiratime /dev/block/loop1 /system
     [ $? -eq 0 ] || fail "Failed to mount /system"
 else
-  losetup /dev/block/loop1 /sdcard/system.img
+  losetup /dev/block/loop1 $card/system.img
   [ $? -eq 0 ] || fail "Failed to find system.img on SD Card"
   mount -t cramfs -o ro,noatime,nodiratime /dev/block/loop1 /system
   [ $? -eq 0 ] || fail "Failed to mount /system"
@@ -208,7 +199,7 @@ if [ -e /system/hero.build ] ; then
         else
                 cp /init.hero.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/hero.user.conf
+	/bin/userinit.sh -c $card/conf/hero.user.conf
 elif [ -e /system/tattoo.build ] ; then
 	echo "Tattoo build detected"
         if [ $KAISER = "1" ] ; then
@@ -216,7 +207,7 @@ elif [ -e /system/tattoo.build ] ; then
         else
                 cp /init.tattoo.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/tattoo.user.conf
+	/bin/userinit.sh -c $card/conf/tattoo.user.conf
 elif [ -e /system/donut.build ] ; then
 	echo "Donut build detected"
         if [ $KAISER = "1" ] ; then
@@ -224,7 +215,7 @@ elif [ -e /system/donut.build ] ; then
         else
                 cp /init.donut.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/donut.user.conf
+	/bin/userinit.sh -c $card/conf/donut.user.conf
 elif [ -e /system/lib/donut ] ; then
         echo "Donut build detected"
         if [ $KAISER = "1" ] ; then
@@ -232,7 +223,7 @@ elif [ -e /system/lib/donut ] ; then
         else
                 cp /init.donut.rc /etc/init.rc
         fi
-        /bin/userinit.sh -c /sdcard/conf/donut.user.conf
+        /bin/userinit.sh -c $card/conf/donut.user.conf
 elif [ -e /system/xrom.build ] ; then
 	echo "xROM build detected"
         if [ $KAISER = "1" ] ; then
@@ -240,7 +231,7 @@ elif [ -e /system/xrom.build ] ; then
         else
                 cp /init.xrom.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/xrom.user.conf
+	/bin/userinit.sh -c $card/conf/xrom.user.conf
 elif [ -e /system/rogers.build ] ; then
 	echo "Rogers build detected"
         if [ $KAISER = "1" ] ; then
@@ -248,7 +239,7 @@ elif [ -e /system/rogers.build ] ; then
         else
                 cp /init.rogers.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/rogers.user.conf
+	/bin/userinit.sh -c $card/conf/rogers.user.conf
 elif [ -e /system/cyanogen.build ] ; then
 	echo "cyanogen experimental detected.....eating donuts"
         if [ $KAISER = "1" ] ; then
@@ -256,7 +247,7 @@ elif [ -e /system/cyanogen.build ] ; then
         else
                 cp /init.cyanogen.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/cyanogen.user.conf
+	/bin/userinit.sh -c $card/conf/cyanogen.user.conf
 elif [ -e /system/custom.build ] ; then
 	echo "Custom init.rc detected"
         if [ $KAISER = "1" ] ; then
@@ -264,7 +255,7 @@ elif [ -e /system/custom.build ] ; then
         else
                 cp /system/sysinit.rc /etc/init.rc
         fi
-	/bin/userinit.sh -c /sdcard/conf/hero.user.conf
+	/bin/userinit.sh -c $card/conf/hero.user.conf
 else
 	echo "Hero/Rogers builds not found. Assuming Ion variant"
 
@@ -280,7 +271,7 @@ else
 	if [ $DIAMOND = "1" ] ; then
 		cp /init.ion.diamond.rc /etc/init.rc
 	fi
-	/bin/userinit.sh -c /sdcard/conf/ion.user.conf
+	/bin/userinit.sh -c $card/conf/ion.user.conf
 fi
 
 # echo /dev/block/mmcblk0p2 > /sys/devices/platform/usb_mass_storage/lun0/file
